@@ -1,4 +1,5 @@
-/* https://github.com/yhat/scrape */
+/* HISPAGATOS */
+/* please read the license */
 
 package main
 
@@ -51,7 +52,7 @@ func main() {
 	})
 
 	con.AddCallback("JOIN", func(e *irc.Event) {
-		con.Privmsg(roomName, "Hello! I am prototype of a bot wrote in golang by NetAnarchist")
+		con.Privmsg(roomName, "Hello! I am prototype of a bot wrote in heavy development")
 	})
 
 	/* con.AddCallback("PRIVMSG", func(e *irc.Event) {
