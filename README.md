@@ -1,0 +1,2 @@
+# GoBot
+IRC BoT 
