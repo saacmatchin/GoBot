@@ -4,6 +4,7 @@
 package main
 
 import (
+	"cgt.name/pkg/go-mwclient"
 	"fmt"
 	"github.com/thoj/go-ircevent"
 	"github.com/yhat/scrape"
@@ -15,6 +16,23 @@ import (
 )
 
 var roomName = "#anarchism"
+
+func queryWikipedia(word string) string {
+
+	w, err := mwclient.New("https://en.wikipedia.org/w/api.php", "GoBot.go wikibot")
+	if err != nil {
+		panic(err)
+	}
+
+	resp, time, err := w.GetPageByName(word)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(resp, time)
+	result := time + resp
+	return result
+}
 
 func resolveUrl(website string) string {
 	println(website)
@@ -65,5 +83,11 @@ func main() {
 		}
 	})
 
+	con.AddCallback("PRIVMSG", func(e *irc.Event) {
+		if strings.Contains(e.Message(), "!wiki") {
+			output := queryWikipedia(e.Message())
+			con.Privmsg(roomName, output)
+		}
+	})
 	con.Loop()
 }
