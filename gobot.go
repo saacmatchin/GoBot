@@ -6,6 +6,7 @@ package main
 import (
 	"cgt.name/pkg/go-mwclient"
 	"fmt"
+	"github.com/mvdan/xurls"
 	"github.com/thoj/go-ircevent"
 	"github.com/yhat/scrape"
 	"golang.org/x/net/html"
@@ -19,19 +20,18 @@ var roomName = "#anarchism"
 
 func queryWikipedia(word string) string {
 
+	fmt.Println(word)
 	w, err := mwclient.New("https://en.wikipedia.org/w/api.php", "GoBot.go wikibot")
 	if err != nil {
 		panic(err)
 	}
 
-	resp, time, err := w.GetPageByName(word)
+	resp, _, err := w.GetPageByName(word)
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	fmt.Println(resp, time)
-	result := time + resp
-	return result
+	fmt.Println(resp)
+	return resp
 }
 
 func resolveUrl(website string) string {
@@ -78,15 +78,17 @@ func main() {
 
 	con.AddCallback("PRIVMSG", func(e *irc.Event) {
 		if strings.Contains(e.Message(), "http") {
-			output := resolveUrl(e.Message()) + " => " + e.Message()
+			fixed := xurls.Relaxed.FindString(e.Message())
+			output := resolveUrl(fixed) + " >===> " + fixed
 			con.Privmsg(roomName, output)
 		}
 	})
 
 	con.AddCallback("PRIVMSG", func(e *irc.Event) {
 		if strings.Contains(e.Message(), "!wiki") {
-			output := queryWikipedia(e.Message())
-			con.Privmsg(roomName, output)
+			fixed := strings.Replace(e.Message(), "!wiki", "", -1)
+			output := queryWikipedia(fixed)
+			con.Privmsgf(roomName, output)
 		}
 	})
 	con.Loop()
