@@ -10,25 +10,65 @@ import (
 	"github.com/yhat/scrape"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
+	"golang.org/x/net/proxy"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 )
 
 var roomName = "#leftsec"
 
+func fatalf(fmtStr string, args interface{}) {
+	fmt.Fprintf(os.Stderr, fmtStr, args)
+	os.Exit(-1)
+}
+
+func getURL(site string) *http.Response {
+
+	tbProxyURL, err := url.Parse("socks5://127.0.0.1:9150")
+	if err != nil {
+		fatalf("Failed to parse proxy URL: %v\n", err)
+	}
+
+	tbDialer, err := proxy.FromURL(tbProxyURL, proxy.Direct)
+	if err != nil {
+		fatalf("Failed to obtain proxy dialer: %v\n", err)
+	}
+
+	tbTransport := &http.Transport{Dial: tbDialer.Dial}
+	client := &http.Client{Transport: tbTransport}
+
+	resp, err := client.Get(site)
+	if err != nil {
+		fatalf("Failed to issue GET request: %v\n", err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Printf("GET returned: %v\n", resp.Status)
+	//	body, err := ioutil.ReadAll(resp.Body)
+	//	if err != nil {
+	//		fatalf("Failed to read the body: %v\n", err)
+	//	}
+	//	fmt.Printf("----- Body -----\n%s\n----- Body -----", body)
+
+	return resp
+}
+
 func queryWikipedia(word string) string {
 	word = strings.TrimSpace(word)
 	website := "http://en.wikipedia.com/wiki/" + word
 	//println(website)
 
-	site, err := http.Get(website)
-	if err != nil {
-		fmt.Println("%s", err)
-		panic(err)
-		os.Exit(1)
-	}
-	defer site.Body.Close()
+	//	site, err := http.Get(website)
+	//	if err != nil {
+	//		fmt.Println("%s", err)
+	//		panic(err)
+	//		os.Exit(1)
+	//	}
+	//	defer site.Body.Close()
+	site := getURL(website)
 	contents, err := html.Parse(site.Body)
 	if err != nil {
 		fmt.Print("%s", err)
@@ -44,14 +84,15 @@ func queryWikipedia(word string) string {
 
 func resolveUrl(website string) string {
 	//println(website)
-	resp, err := http.Get(website)
-	if err != nil {
-		fmt.Printf("%s", err)
-		panic(err)
-		os.Exit(1)
-	}
-	defer resp.Body.Close()
-	contents, err := html.Parse(resp.Body)
+	//	resp, err := http.Get(website)
+	//	if err != nil {
+	//		fmt.Printf("%s", err)
+	//		panic(err)
+	//		os.Exit(1)
+	//	}
+	//	defer resp.Body.Close()
+	site := getURL(website)
+	contents, err := html.Parse(site.Body)
 	if err != nil {
 		fmt.Printf("%s", err)
 		os.Exit(1)
@@ -66,8 +107,10 @@ func resolveUrl(website string) string {
 }
 
 func main() {
+
 	con := irc.IRC("GoBot", "goBot")
 	err := con.Connect("10.8.0.1:6668")
+
 	if err != nil {
 		fmt.Println("Failed connecting")
 		return
