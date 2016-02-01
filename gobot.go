@@ -11,7 +11,6 @@ import (
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 	"golang.org/x/net/proxy"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
