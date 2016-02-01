@@ -4,7 +4,6 @@
 package main
 
 import (
-	"cgt.name/pkg/go-mwclient"
 	"fmt"
 	"github.com/mvdan/xurls"
 	"github.com/thoj/go-ircevent"
@@ -16,21 +15,30 @@ import (
 	"strings"
 )
 
-var roomName = "#anarchism"
+var roomName = "#leftsec"
 
 func queryWikipedia(word string) string {
+	word = strings.TrimSpace(word)
+	website := "http://en.wikipedia.com/wiki/" + word
+	println(website)
 
-	fmt.Println(word)
-	w, err := mwclient.New("https://en.wikipedia.org/w/api.php", "GoBot.go wikibot")
+	site, err := http.Get(website)
 	if err != nil {
+		fmt.Println("%s", err)
 		panic(err)
+		os.Exit(1)
 	}
-
-	resp, _, err := w.GetPageByName(word)
+	defer site.Body.Close()
+	contents, err := html.Parse(site.Body)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Print("%s", err)
+		panic(err)
+		os.Exit(1)
 	}
-	fmt.Println(resp)
+	intro, ok := scrape.Find(contents, scrape.ByTag(atom.P))
+	//fmt.Println(scrape.Text(intro))
+	//fmt.Println("%b", ok)
+	var resp string = scrape.Text(intro)
 	return resp
 }
 
@@ -50,8 +58,8 @@ func resolveUrl(website string) string {
 		panic(err)
 	}
 	title, ok := scrape.Find(contents, scrape.ByTag(atom.Title))
-	fmt.Println(scrape.Text(title))
-	fmt.Println("%b", ok)
+	//fmt.Println(scrape.Text(title))
+	//fmt.Println("%b", ok)
 	var titulo string = scrape.Text(title)
 	return titulo
 
@@ -68,13 +76,13 @@ func main() {
 		con.Join(roomName)
 	})
 
-	con.AddCallback("JOIN", func(e *irc.Event) {
-		con.Privmsg(roomName, "Hello! I am prototype of a bot wrote in heavy development")
+	con.AddCallback("PRIVMSG", func(e *irc.Event) {
+		if strings.Contains(e.Message(), "!help") {
+			fixed := strings.Replace(e.Message(), "!help", "", -1)
+			output := "Hello Im a Bot, my commands are !wiki, !help and I resolve URL's info on channel my owner is NetAnarchist"
+			con.Privmsg(roomName, output)
+		}
 	})
-
-	/* con.AddCallback("PRIVMSG", func(e *irc.Event) {
-		con.Privmsg(roomName, e.Message())
-	}) */
 
 	con.AddCallback("PRIVMSG", func(e *irc.Event) {
 		if strings.Contains(e.Message(), "http") {
