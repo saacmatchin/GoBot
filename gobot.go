@@ -20,7 +20,7 @@ var roomName = "#leftsec"
 func queryWikipedia(word string) string {
 	word = strings.TrimSpace(word)
 	website := "http://en.wikipedia.com/wiki/" + word
-	println(website)
+	//println(website)
 
 	site, err := http.Get(website)
 	if err != nil {
@@ -43,7 +43,7 @@ func queryWikipedia(word string) string {
 }
 
 func resolveUrl(website string) string {
-	println(website)
+	//println(website)
 	resp, err := http.Get(website)
 	if err != nil {
 		fmt.Printf("%s", err)
