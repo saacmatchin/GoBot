@@ -35,7 +35,7 @@ func queryWikipedia(word string) string {
 		panic(err)
 		os.Exit(1)
 	}
-	intro, ok := scrape.Find(contents, scrape.ByTag(atom.P))
+	intro, _ := scrape.Find(contents, scrape.ByTag(atom.P))
 	//fmt.Println(scrape.Text(intro))
 	//fmt.Println("%b", ok)
 	var resp string = scrape.Text(intro)
@@ -57,7 +57,7 @@ func resolveUrl(website string) string {
 		os.Exit(1)
 		panic(err)
 	}
-	title, ok := scrape.Find(contents, scrape.ByTag(atom.Title))
+	title, _ := scrape.Find(contents, scrape.ByTag(atom.Title))
 	//fmt.Println(scrape.Text(title))
 	//fmt.Println("%b", ok)
 	var titulo string = scrape.Text(title)
@@ -78,7 +78,6 @@ func main() {
 
 	con.AddCallback("PRIVMSG", func(e *irc.Event) {
 		if strings.Contains(e.Message(), "!help") {
-			fixed := strings.Replace(e.Message(), "!help", "", -1)
 			output := "Hello Im a Bot, my commands are !wiki, !help and I resolve URL's info on channel my owner is NetAnarchist"
 			con.Privmsg(roomName, output)
 		}
