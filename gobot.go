@@ -108,7 +108,7 @@ func resolveUrl(website string) string {
 func main() {
 
 	con := irc.IRC("GoBot", "goBot")
-	err := con.Connect("10.8.0.1:6668")
+	err := con.Connect("127.0.0.1:6668")
 
 	if err != nil {
 		fmt.Println("Failed connecting")
