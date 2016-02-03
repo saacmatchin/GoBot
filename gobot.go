@@ -17,7 +17,7 @@ import (
 	"strings"
 )
 
-var roomName = "#leftsec"
+var roomName = "#yourchannelhere"
 
 func fatalf(fmtStr string, args interface{}) {
 	fmt.Fprintf(os.Stderr, fmtStr, args)
