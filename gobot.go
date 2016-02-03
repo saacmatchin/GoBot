@@ -43,54 +43,31 @@ func getURL(site string) *http.Response {
 	if err != nil {
 		fatalf("Failed to issue GET request: %v\n", err)
 	}
-	defer resp.Body.Close()
 
 	fmt.Printf("GET returned: %v\n", resp.Status)
-	//	body, err := ioutil.ReadAll(resp.Body)
-	//	if err != nil {
-	//		fatalf("Failed to read the body: %v\n", err)
-	//	}
-	//	fmt.Printf("----- Body -----\n%s\n----- Body -----", body)
-
 	return resp
+
 }
 
 func queryWikipedia(word string) string {
 	word = strings.TrimSpace(word)
 	website := "http://en.wikipedia.com/wiki/" + word
-	//println(website)
-
-	//	site, err := http.Get(website)
-	//	if err != nil {
-	//		fmt.Println("%s", err)
-	//		panic(err)
-	//		os.Exit(1)
-	//	}
-	//	defer site.Body.Close()
 	site := getURL(website)
 	contents, err := html.Parse(site.Body)
+
 	if err != nil {
 		fmt.Print("%s", err)
 		panic(err)
 		os.Exit(1)
 	}
 	intro, _ := scrape.Find(contents, scrape.ByTag(atom.P))
-	//fmt.Println(scrape.Text(intro))
-	//fmt.Println("%b", ok)
 	var resp string = scrape.Text(intro)
 	return resp
 }
 
 func resolveUrl(website string) string {
-	//println(website)
-	//	resp, err := http.Get(website)
-	//	if err != nil {
-	//		fmt.Printf("%s", err)
-	//		panic(err)
-	//		os.Exit(1)
-	//	}
-	//	defer resp.Body.Close()
 	site := getURL(website)
+
 	contents, err := html.Parse(site.Body)
 	if err != nil {
 		fmt.Printf("%s", err)
@@ -98,8 +75,6 @@ func resolveUrl(website string) string {
 		panic(err)
 	}
 	title, _ := scrape.Find(contents, scrape.ByTag(atom.Title))
-	//fmt.Println(scrape.Text(title))
-	//fmt.Println("%b", ok)
 	var titulo string = scrape.Text(title)
 	return titulo
 
@@ -108,7 +83,7 @@ func resolveUrl(website string) string {
 func main() {
 
 	con := irc.IRC("GoBot", "goBot")
-	err := con.Connect("127.0.0.1:6668")
+	err := con.Connect("10.8.0.1:6668")
 
 	if err != nil {
 		fmt.Println("Failed connecting")
