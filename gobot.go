@@ -95,7 +95,7 @@ func main() {
 
 	con.AddCallback("PRIVMSG", func(e *irc.Event) {
 		if strings.Contains(e.Message(), "!help") {
-			output := "Hello Im a Bot, my commands are !wiki, !help and I resolve URL's info on channel my owner is NetAnarchist"
+			output := "Hello Im a Bot, my commands are !wiki, !help and I resolve URL's info on channel my owner is <yourname>"
 			con.Privmsg(roomName, output)
 		}
 	})
