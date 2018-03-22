@@ -1,23 +1,26 @@
 /* HISPAGATOS */
+/* By ReK2 */
 /* please read the license */
 
 package main
 
 import (
 	"fmt"
-	"github.com/mvdan/xurls"
 	"github.com/thoj/go-ircevent"
 	"github.com/yhat/scrape"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 	"golang.org/x/net/proxy"
+	"mvdan.cc/xurls"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 )
 
-var roomName = "#yourchannelhere"
+const roomName = "#hispagatos"
+const serverName = "127.0.0.1:6668"
+const torServerName = "socks5://10.8.0.1:9050"
 
 func fatalf(fmtStr string, args interface{}) {
 	fmt.Fprintf(os.Stderr, fmtStr, args)
@@ -26,7 +29,7 @@ func fatalf(fmtStr string, args interface{}) {
 
 func getURL(site string) *http.Response {
 
-	tbProxyURL, err := url.Parse("socks5://127.0.0.1:9150")
+	tbProxyURL, err := url.Parse(torServerName)
 	if err != nil {
 		fatalf("Failed to parse proxy URL: %v\n", err)
 	}
@@ -61,11 +64,11 @@ func queryWikipedia(word string) string {
 		os.Exit(1)
 	}
 	intro, _ := scrape.Find(contents, scrape.ByTag(atom.P))
-	var resp string = scrape.Text(intro)
+	resp := scrape.Text(intro)
 	return resp
 }
 
-func resolveUrl(website string) string {
+func resolveURL(website string) string {
 	site := getURL(website)
 
 	contents, err := html.Parse(site.Body)
@@ -75,7 +78,7 @@ func resolveUrl(website string) string {
 		panic(err)
 	}
 	title, _ := scrape.Find(contents, scrape.ByTag(atom.Title))
-	var titulo string = scrape.Text(title)
+	titulo := scrape.Text(title)
 	return titulo
 
 }
@@ -83,27 +86,33 @@ func resolveUrl(website string) string {
 func main() {
 
 	con := irc.IRC("GoBot", "goBot")
-	err := con.Connect("10.8.0.1:6668")
+	err := con.Connect(serverName)
+
+	con.VerboseCallbackHandler = true
+	con.Debug = true
 
 	if err != nil {
 		fmt.Println("Failed connecting")
+		fmt.Printf("Err %s", err)
 		return
 	}
 	con.AddCallback("001", func(e *irc.Event) {
 		con.Join(roomName)
 	})
 
+	con.AddCallback("366", func(e *irc.Event) {})
+
 	con.AddCallback("PRIVMSG", func(e *irc.Event) {
 		if strings.Contains(e.Message(), "!help") {
-			output := "Hello Im a Bot, my commands are !wiki, !help and I resolve URL's info on channel my owner is <yourname>"
+			output := "Hello Im a Bot my commands are !wiki, !help and I resolve URL's info on channel my owner is <yourname>"
 			con.Privmsg(roomName, output)
 		}
 	})
 
 	con.AddCallback("PRIVMSG", func(e *irc.Event) {
 		if strings.Contains(e.Message(), "http") {
-			fixed := xurls.Relaxed.FindString(e.Message())
-			output := resolveUrl(fixed) + " >===> " + fixed
+			fixed := xurls.Relaxed().FindString(e.Message())
+			output := resolveURL(fixed) + " >===> " + fixed
 			con.Privmsg(roomName, output)
 		}
 	})
