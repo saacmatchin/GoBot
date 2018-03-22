@@ -99,7 +99,7 @@ func queryWikipedia(word string) string {
 }
 
 func resolveURL(website string) string {
-	if website.Contains(".i2p") {
+	if strings.Contains(website, ".i2p") {
 		site := getI2pURL(website)
 	} else {
 		site := getURL(website)
