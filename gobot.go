@@ -156,10 +156,11 @@ func gobot() {
 		}
 	})
 
-	con.AddCallback("NOTICE", func(e *irc.Event) {
-		output := "Hola, bienvenido a #hispagatos soy el bot de ReK2, escribe !help para mis comandos"
-		con.Privmsg(roomName, output)
-
+	con.AddCallback("PRIVMSG", func(e *irc.Event) {
+		if strings.Contains(e.Message(), "has joined") {
+			output := "Hola, bienvenido a #hispagatos soy el bot de ReK2, escribe !help para mis comandos"
+			con.Privmsg(roomName, output)
+		}
 	})
 
 	con.AddCallback("PRIVMSG", func(e *irc.Event) {
