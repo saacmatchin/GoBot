@@ -174,7 +174,7 @@ func main() {
 		LogFilePerm: 0640,
 		WorkDir:     "./",
 		Umask:       027,
-		Args:        []string{"[go-daemon sample]"},
+		Args:        []string{"[GoBot]"},
 	}
 
 	d, err := cntxt.Reborn()
