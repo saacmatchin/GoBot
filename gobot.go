@@ -6,11 +6,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/sevlyar/go-daemon"
 	"github.com/thoj/go-ircevent"
 	"github.com/yhat/scrape"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 	"golang.org/x/net/proxy"
+	"log"
 	"mvdan.cc/xurls"
 	"net/http"
 	"net/url"
@@ -18,9 +20,11 @@ import (
 	"strings"
 )
 
-const roomName = "#hispagatos"
-const serverName = "127.0.0.1:6668"
-const torServerName = "socks5://10.8.0.1:9050"
+const (
+	roomName      = "#hispagatos"
+	serverName    = "10.8.0.1:6668"
+	torServerName = "socks5://10.8.0.1:9050"
+)
 
 func fatalf(fmtStr string, args interface{}) {
 	fmt.Fprintf(os.Stderr, fmtStr, args)
@@ -83,13 +87,14 @@ func resolveURL(website string) string {
 
 }
 
-func main() {
+func gobot() {
 
 	con := irc.IRC("GoBot", "goBot")
 	err := con.Connect(serverName)
 
-	con.VerboseCallbackHandler = true
-	con.Debug = true
+	// For Debug
+	//con.VerboseCallbackHandler = true
+	//con.Debug = true
 
 	if err != nil {
 		fmt.Println("Failed connecting")
@@ -125,4 +130,30 @@ func main() {
 		}
 	})
 	con.Loop()
+}
+
+func main() {
+	cntxt := &daemon.Context{
+		PidFileName: "GoBot.pid",
+		PidFilePerm: 0644,
+		LogFileName: "GoBot.log",
+		LogFilePerm: 0640,
+		WorkDir:     "./",
+		Umask:       027,
+		Args:        []string{"[go-daemon sample]"},
+	}
+
+	d, err := cntxt.Reborn()
+	if err != nil {
+		log.Fatal("Unable to run: ", err)
+	}
+	if d != nil {
+		return
+	}
+	defer cntxt.Release()
+
+	log.Print("- - - - - - - - - - - - - - -")
+	log.Print("GoBot Started")
+
+	gobot()
 }
