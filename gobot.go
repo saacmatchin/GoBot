@@ -102,10 +102,10 @@ func resolveURL(website string) string {
 	var site *http.Response
 
 	if strings.Contains(website, ".i2p") {
-		site := getI2pURL(website)
+		site = getI2pURL(website)
 
 	} else {
-		site := getURL(website)
+		site = getURL(website)
 
 	}
 
