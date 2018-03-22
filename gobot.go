@@ -99,10 +99,14 @@ func queryWikipedia(word string) string {
 }
 
 func resolveURL(website string) string {
+	var site string
+
 	if strings.Contains(website, ".i2p") {
 		site := getI2pURL(website)
+
 	} else {
 		site := getURL(website)
+
 	}
 
 	contents, err := html.Parse(site.Body)
