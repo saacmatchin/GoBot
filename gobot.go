@@ -24,6 +24,7 @@ const (
 	roomName      = "#hispagatos"
 	serverName    = "10.8.0.1:6668"
 	torServerName = "socks5://10.8.0.1:9050"
+	i2pServerName = "socks5://10.8.0.1:4444"
 )
 
 func fatalf(fmtStr string, args interface{}) {
@@ -34,6 +35,31 @@ func fatalf(fmtStr string, args interface{}) {
 func getURL(site string) *http.Response {
 
 	tbProxyURL, err := url.Parse(torServerName)
+	if err != nil {
+		fatalf("Failed to parse proxy URL: %v\n", err)
+	}
+
+	tbDialer, err := proxy.FromURL(tbProxyURL, proxy.Direct)
+	if err != nil {
+		fatalf("Failed to obtain proxy dialer: %v\n", err)
+	}
+
+	tbTransport := &http.Transport{Dial: tbDialer.Dial}
+	client := &http.Client{Transport: tbTransport}
+
+	resp, err := client.Get(site)
+	if err != nil {
+		fatalf("Failed to issue GET request: %v\n", err)
+	}
+
+	fmt.Printf("GET returned: %v\n", resp.Status)
+	return resp
+
+}
+
+func getI2pURL(site string) *http.Response {
+
+	tbProxyURL, err := url.Parse(i2pServerName)
 	if err != nil {
 		fatalf("Failed to parse proxy URL: %v\n", err)
 	}
@@ -73,7 +99,11 @@ func queryWikipedia(word string) string {
 }
 
 func resolveURL(website string) string {
-	site := getURL(website)
+	if website.Contains(".i2p") {
+		site := getI2pURL(website)
+	} else {
+		site := getURL(website)
+	}
 
 	contents, err := html.Parse(site.Body)
 	if err != nil {
@@ -109,7 +139,7 @@ func gobot() {
 
 	con.AddCallback("PRIVMSG", func(e *irc.Event) {
 		if strings.Contains(e.Message(), "!help") {
-			output := "Hello Im a Bot my commands are !wiki, !help and I resolve URL's info on channel my owner is <yourname>"
+			output := "Hello Im a Bot my commands are !wiki, !help and I resolve URL's info on channel my owner is ReK2"
 			con.Privmsg(roomName, output)
 		}
 	})
