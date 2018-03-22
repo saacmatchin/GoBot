@@ -24,7 +24,7 @@ const (
 	roomName      = "#hispagatos"
 	serverName    = "10.8.0.1:6668"
 	torServerName = "socks5://10.8.0.1:9050"
-	i2pServerName = "socks5://10.8.0.1:4444"
+	i2pServerName = "socks5://10.8.0.1:4447"
 )
 
 func fatalf(fmtStr string, args interface{}) {
